@@ -13,28 +13,12 @@ Development started: 7th September 2021
 import random
 import time
 import math
+import json
 
 # Variables =====================
-maps_data = [ 
-    {
-        "map": [
-            "XXXX",
-            "X  X",
-            "X  X",
-            "S  E",
-        ], 
-        "path":"wwwdddsss"
-    },
-    {
-        "map": [
-            " XXX",
-            "XX X",
-            "X XX",
-            "S E ",
-        ],
-        "path":"wwdwddssas"
-    }
-]
+maps_data = []
+with open('maps.json') as f:
+    maps_data = json.load(f)["maps"]
 
 # Functions =====================
 

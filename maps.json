@@ -1,0 +1,44 @@
+{
+    "maps": [
+        {
+            "map": [
+                "XXXX",
+                "X  X",
+                "X  X",
+                "S  E"
+            ], 
+            "path":"wwwdddsss"
+        },
+        {
+            "map": [
+                " XXX",
+                "XX X",
+                "X XX",
+                "S E "
+            ],
+            "path":"wwdwddssas"
+        },
+        {
+            "map": [
+                "XXXXXX",
+                "XX   X",
+                " X  XX",
+                "SX  XE"
+            ],
+            "path":"dwwawdddddssasd"
+        },
+        {
+            "map": [
+                "  XXX",
+                "XXX X",
+                "X SXX",
+                "X    ",
+                "X EXX",
+                "X   X",
+                "XXX X",
+                "  XXX"
+            ], 
+            "path":"ddwwaasaasssssddsddwwwaa"
+        }
+    ]
+}
