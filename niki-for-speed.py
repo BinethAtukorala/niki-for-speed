@@ -16,6 +16,7 @@ import math
 import json
 
 # Variables =====================
+
 maps_data = []
 with open('maps.json') as f:
     maps_data = json.load(f)["maps"]
