@@ -21,16 +21,18 @@
         {
             "map": [
                 "XXXXXX",
+                "X    X",
                 "XX   X",
                 " X  XX",
                 "SX  XE"
             ],
-            "path":"dwwawdddddssasd"
+            "path":"dwwawwdddddsssasd"
         },
         {
             "map": [
                 "  XXX",
                 "XXX X",
+                "X   X",
                 "X SXX",
                 "X    ",
                 "X EXX",
@@ -38,7 +40,7 @@
                 "XXX X",
                 "  XXX"
             ], 
-            "path":"ddwwaasaasssssddsddwwwaa"
+            "path":"ddwwwaasaassssssddsddwwwaa"
         }
     ]
 }
