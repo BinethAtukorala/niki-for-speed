@@ -1,0 +1,9 @@
+{
+    "discord": {
+        "token": "<Enter your discord bot's token here>",
+        "prefix": "nfs "
+    },
+    "app": {
+        "logging": false
+    }
+}
