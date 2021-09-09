@@ -1,9 +1,15 @@
-# Niki for Speed: Text Edition
-### - A text based racing game
+# Niki for Speed: Text Edition v8.306624...
+### - A text based racing game discord bot
 
 By: Bineth Atukorala, Nikita Ünver
-Development started: 7th September 2021
+Development started: 9th September 2021
 
-## Run
+## Install & Run
 
-`python niki-for-speed.py`
+First install the required libraries with
+`pip install -r requirements.txt`
+
+Fill out the required data on config.json
+
+Then run the bot with
+`python main.py`
