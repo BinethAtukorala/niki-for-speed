@@ -26,7 +26,6 @@ class GameCog(commands.Cog):
         secs = math.floor(time_taken_milis / 1000)
         time_taken_milis = time_taken_milis - secs * 1000
         milis = time_taken_milis
-
         return "{} mins {} secs {} ms".format(mins, secs, milis)
     
     def find_start_pos(self, current_map:list):

@@ -10,10 +10,10 @@ import discord
 
 def get_config():
     """
-    READ /config.json and return it's content as a dict
+    READ /data/config.json and return it's content as a dict
     """
     try:
-        with open("config.json", "r") as f:
+        with open("data/config.json", "r") as f:
             data = f.read()
         return json.loads(data)
     except IOError:
@@ -35,6 +35,6 @@ def get_maps_data():
     """
     READ /maps.json and return a list of maps.
     """
-    with open("maps.json", "r") as f:
+    with open("data/maps.json", "r") as f:
         data = f.read()
     return json.loads(data)["maps"]

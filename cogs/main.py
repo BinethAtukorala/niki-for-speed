@@ -15,7 +15,20 @@ class MainCog(commands.Cog):
     async def ping(self, ctx):
         """Check whether the bot is online"""
 
-        await ctx.send("Pong! `{}ms` 🏓".format(int(self.bot.latency * 100)))
+        pong_embed = discord.Embed(title="Pong! `{}ms` 🏓".format(int(self.bot.latency * 100)))
+
+        await ctx.send(embed=pong_embed)
+
+    @commands.command(name="help")
+    async def help(self, ctx, *args):
+        """The help command of the bot"""
+
+        help_embed = discord.Embed(
+            title="❓ Help - Niki for Speed v8.306624...",
+            description="**For more info: nfs help [command]**\nAdd `nfs` before any command"
+            )
+        
+        await ctx.send(embed=help_embed)
 
 def setup(bot):
     bot.add_cog(MainCog(bot))
