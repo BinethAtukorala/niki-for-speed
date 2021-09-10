@@ -2,9 +2,9 @@
     "commands": {
         "game": [
             {
-                "name": "race",
+                "name": "sp",
                 "description": "Start a singleplayer race.",
-                "usage": "nfs race"
+                "usage": "nfs sp"
             }
         ],
         "statistics": {

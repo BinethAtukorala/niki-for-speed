@@ -11,6 +11,14 @@ import math
 import random
 import re
 
+# Constants ========================
+
+XP_VALUES = {
+    "easy": 100,
+    "medium": 200,
+    "hard": 400
+}
+
 class GameCog(commands.Cog):
     """
     The fun stuff lol.
@@ -76,8 +84,8 @@ class GameCog(commands.Cog):
             map_str += line_str + "\n"
         return map_str
 
-    @commands.command(name="single")
-    async def single(self, ctx):
+    @commands.command(name="sp")
+    async def sp(self, ctx):
         """Start a new race"""
 
         if ctx.channel.id in self.currently_running_channels:
@@ -98,6 +106,13 @@ class GameCog(commands.Cog):
         self.currently_running_channels.append(ctx.channel.id)
 
         await ctx.send(embed=welcome_embed)
+
+        # Get user's profile or create a new profile if they dont have one
+        current_profile = utils.get_profile_by_discord_id(ctx.author.id)
+        # If no profile exists
+        if current_profile == None:
+            current_profile = utils.new_profile(ctx.author.id)
+        print(current_profile)
         
         # Pick a random map and record start time
         current_map = next(utils.get_random_map())
@@ -154,6 +169,16 @@ class GameCog(commands.Cog):
                 title="You won!",
                 description="Time taken: {}".format(time_taken)
                 )
+            
+            # Update XP and race count
+            if "difficulty" in current_map:
+                xp_earned = XP_VALUES[current_map["difficulty"]]
+            # give the default xp amount if no difficulty is set
+            else:
+                xp_earned = XP_VALUES["easy"]
+            
+            utils.sp_won(current_profile["_id"], xp_earned)
+
         self.currently_running_channels.pop(self.currently_running_channels.index(ctx.channel.id))
         await ctx.send(embed=final_embed)
 # are you ruining my code that i worked SO hard on

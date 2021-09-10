@@ -39,7 +39,7 @@ class MainCog(commands.Cog):
             game_commands_str = ""
 
             for x in commands_help["game"]:
-                game_commands_str += "`" + x["name"] + "` "
+                game_commands_str += "`" + x["name"] + "`, "
 
             help_embed = help_embed.add_field(
                 name="🎮 Game commands",

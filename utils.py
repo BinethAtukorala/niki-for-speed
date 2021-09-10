@@ -53,6 +53,7 @@ client = MongoClient(CONNECTION_STRING)
 db = client[database]
 
 maps_col = db["maps"]
+profiles_col = db["profiles"]
 
 def get_random_map():
     """
@@ -60,4 +61,37 @@ def get_random_map():
     """
 
     return maps_col.aggregate([{"$sample": {"size": 1}}])
-    
+
+def get_profile_by_discord_id(discord_id):
+    """
+    Get the user's profile with their Discord ID
+    """
+
+    profile = profiles_col.find_one({"discord_id": discord_id})
+
+    return profile
+
+def new_profile(discord_id):
+    """
+    Create a new profile and return it
+    """
+
+    profile = {
+        "discord_id": discord_id,
+        "xp": 0,
+        "race_count": 0,
+        "multiplayer_wins": 0,
+        "badges": [],
+        "multiplayer_streak": 0,
+        "fastest_laps": {}
+    }
+
+    result = profiles_col.insert_one(profile)
+
+    return profiles_col.find_one({"_id": result.inserted_id})
+
+def sp_won(id, xp_earned):
+
+    result = profiles_col.update_one({"_id": id}, {"$inc": {"xp": xp_earned, "race_count": 1}})
+
+    return result
