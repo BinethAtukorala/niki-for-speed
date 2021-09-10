@@ -1,6 +1,6 @@
 tmp/
 env/
-config.json
+data/config.json
 .vscode/
 logs/
 **/__pycache__/
