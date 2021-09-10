@@ -6,9 +6,9 @@ level_name = ["lev1", "lev2", "lev3"]
 #  rankings = ["rank1", "rank2", "rank3"]
 level = [1, 5, 10]
 
-talk_channels = []
+talk_channels = [885179991028015145]
 
-cluster = MongoClient("mongodb+srv://nfs:itriedtolearnhow2skate@cluster0.dyzkx.mongodb.net/nfs?retryWrites=true&w=majority")
+cluster = MongoClient("mongodb+srv://nfs:itriedtolearnhow2skate@cluster0.dyzkx.mongodb.net/niki-for-speed?retryWrites=true&w=majority")
 
 leveling = cluster["discord"]["leveling"]
 
@@ -48,7 +48,7 @@ class Exp(commands.Cog):
 
         @commands.command()
         async def rank(self, ctx):
-            if ctx.cannel.id == talk_channels:
+            if ctx.channel.id == talk_channels:
                 stats = leveling.find_one({"id" : ctx.author.id})
                 if stats is None:
                     embed = discord.Embed(description="You haven't earned enough XP yet.")
@@ -94,6 +94,6 @@ class Exp(commands.Cog):
                       break
               await ctx.channel.send(embed=embed)
 
-def setup(client):
-    client.add.cog(exp(client))
+        def setup(client):
+    client.add.cog(exp(client))      
     
