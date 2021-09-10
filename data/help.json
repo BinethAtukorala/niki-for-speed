@@ -1,0 +1,20 @@
+{
+    "commands": {
+        "game": [
+            {
+                "name": "race",
+                "description": "Start a singleplayer race.",
+                "usage": "nfs race"
+            }
+        ],
+        "statistics": {
+
+        },
+        "profile": {
+
+        },
+        "settings": {
+
+        }
+    }
+}

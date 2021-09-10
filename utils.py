@@ -6,6 +6,9 @@ from datetime import datetime
 
 import discord
 
+from pymongo import MongoClient
+import pymongo
+
 # Reading config.json
 
 def get_config():
@@ -31,10 +34,30 @@ def get_discord_config():
     except:
         raise Exception("Couldn't find discord configs in /config.json")
 
-def get_maps_data():
+def get_commands_help():
     """
-    READ /maps.json and return a list of maps.
+    READ /data/help.json and return a dictionary of it's data
     """
-    with open("data/maps.json", "r") as f:
+    with open("data/help.json", "r") as f:
         data = f.read()
-    return json.loads(data)["maps"]
+    return json.loads(data)["commands"]
+
+# MongoDB
+
+mongo_config = get_config()["mongo"]
+CONNECTION_STRING = mongo_config["connection_string"]
+database = mongo_config["database"]
+
+client = MongoClient(CONNECTION_STRING)
+
+db = client[database]
+
+maps_col = db["maps"]
+
+def get_random_map():
+    """
+    Get a random map from MongoDB
+    """
+
+    return maps_col.aggregate([{"$sample": {"size": 1}}])
+    

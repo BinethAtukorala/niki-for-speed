@@ -23,12 +23,30 @@ class MainCog(commands.Cog):
     async def help(self, ctx, *args):
         """The help command of the bot"""
 
-        help_embed = discord.Embed(
-            title="❓ Help - Niki for Speed v8.306624...",
-            description="**For more info: nfs help [command]**\nAdd `nfs` before any command"
+        if(len(args) > 0):
+
+            print(lol)
+
+        else:
+
+            help_embed = discord.Embed(
+                title="❓ Help - Niki for Speed v8.306624...",
+                description="**For more info: nfs help [command]**\nAdd `nfs` before any command"
+                )
+
+            commands_help = utils.get_commands_help()
+
+            game_commands_str = ""
+
+            for x in commands_help["game"]:
+                game_commands_str += "`" + x["name"] + "` "
+
+            help_embed = help_embed.add_field(
+                name="🎮 Game commands",
+                value=game_commands_str[:-2]
             )
-        
-        await ctx.send(embed=help_embed)
+            
+            await ctx.send(embed=help_embed)
 
 def setup(bot):
     bot.add_cog(MainCog(bot))

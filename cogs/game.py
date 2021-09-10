@@ -76,8 +76,8 @@ class GameCog(commands.Cog):
             map_str += line_str + "\n"
         return map_str
 
-    @commands.command(name="race")
-    async def race(self, ctx):
+    @commands.command(name="single")
+    async def single(self, ctx):
         """Start a new race"""
 
         if ctx.channel.id in self.currently_running_channels:
@@ -87,11 +87,9 @@ class GameCog(commands.Cog):
             await ctx.send(embed=already_running_embed)
             return
 
-        maps_data = utils.get_maps_data()
-
         welcome_embed = discord.Embed(
             title=f"Niki for Speed: Text Edition v8.306624...",
-            description="The race will start in 5 seconds..."
+            description="🏎️**Singleplayer Race**\nThe race will start in 5 seconds..."
         ).add_field(
             name="Instructions",
             value=":white_small_square: Enter the correct order of steps to go to the finish line.\n:white_small_square: The steps are w - forward, a - left, s - down, d - right.\n:white_small_square: An example path might look like this :- wwasdwdasasssdw\n:white_small_square: You only have 3 tries to complete the race.\n:white_small_square: You only have 90 seconds between each try."
@@ -101,11 +99,11 @@ class GameCog(commands.Cog):
 
         await ctx.send(embed=welcome_embed)
         
+        # Pick a random map and record start time
+        current_map = next(utils.get_random_map())
+
         # Wait for 5 seconds for the race to start
         await asyncio.sleep(5)
-
-        # Pick a random map and record start time
-        current_map = maps_data[random.randint(0, len(maps_data)-1)]
 
         map_embed = discord.Embed(
             title=f"Racetrack",
@@ -139,7 +137,7 @@ class GameCog(commands.Cog):
                     except asyncio.TimeoutError:
                         print("Time out")
                         self.currently_running_channels.pop(self.currently_running_channels.index(ctx.channel.id))
-                        await ctx.send(embed=discord.Embed(title="You took too long to finish the race."))
+                        await ctx.send(embed=discord.Embed(title="You took too long to finish the race. You lost slowpoke!"))
                         return
                     # Record finishing time
                     finish_time_milis = round(time.time() * 1000)
@@ -153,7 +151,7 @@ class GameCog(commands.Cog):
             # Output time taken
             time_taken = self.format_time(finish_time_milis - start_time_milis)
             final_embed = discord.Embed(
-                title="You took the right path. You won!",
+                title="You won!",
                 description="Time taken: {}".format(time_taken)
                 )
         self.currently_running_channels.pop(self.currently_running_channels.index(ctx.channel.id))

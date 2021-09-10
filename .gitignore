@@ -4,3 +4,4 @@ data/config.json
 .vscode/
 logs/
 **/__pycache__/
+.idea/

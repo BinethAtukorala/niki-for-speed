@@ -10,7 +10,8 @@ logger = logging.getLogger('__main__')
 class NFSBot(commands.Bot):
     COGS = [
         'cogs.game',
-        'cogs.main'
+        'cogs.main',
+        'cogs.exp'
     ]
 
     def __init__(self, token, prefix):
