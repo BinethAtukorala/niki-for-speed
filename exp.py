@@ -8,7 +8,7 @@ level = [1, 5, 10]
 
 talk_channels = [885179991028015145]
 
-cluster = MongoClient("mongodb+srv://nfs:itriedtolearnhow2skate@cluster0.dyzkx.mongodb.net/niki-for-speed?retryWrites=true&w=majority")
+cluster = MongoClient("")
 
 leveling = cluster["discord"]["leveling"]
 
