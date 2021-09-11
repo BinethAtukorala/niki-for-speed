@@ -1,5 +1,6 @@
 from discord.ext import commands
 import discord
+import math
 
 import utils
 
@@ -39,7 +40,7 @@ class MainCog(commands.Cog):
             game_commands_str = ""
 
             for x in commands_help["game"]:
-                game_commands_str += "`" + x["name"] + "`, "
+                game_commands_str += "`" + x["name"] + "` "
 
             help_embed = help_embed.add_field(
                 name="🎮 Game commands",
@@ -47,6 +48,12 @@ class MainCog(commands.Cog):
             )
             
             await ctx.send(embed=help_embed)
+
+import math
+
+def calculate_level(xp):
+  level = floor(math.log(xp/2500, 1.3))
+  return level
 
 def setup(bot):
     bot.add_cog(MainCog(bot))
