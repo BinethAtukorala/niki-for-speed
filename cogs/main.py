@@ -69,11 +69,6 @@ class MainCog(commands.Cog):
             
             await ctx.send(embed=help_embed)
 
-import math
-
-def calculate_level(xp):
-  level = floor(math.log(xp/2500, 1.3))
-  return level
 
 def setup(bot):
     bot.add_cog(MainCog(bot))
