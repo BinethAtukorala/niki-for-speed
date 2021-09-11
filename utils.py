@@ -95,3 +95,7 @@ def sp_won(id, xp_earned):
     result = profiles_col.update_one({"_id": id}, {"$inc": {"xp": xp_earned, "race_count": 1}})
 
     return result
+
+def set_high_score(id, fastest_laps):
+
+    result = profiles_col.update_one({"_id": id}, {"$set": {"fastest_laps": fastest_laps}})

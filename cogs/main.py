@@ -26,7 +26,27 @@ class MainCog(commands.Cog):
 
         if(len(args) > 0):
 
-            print(lol)
+            commands_help = utils.get_commands_help()
+
+            for category in commands_help.keys():
+                for x in commands_help[category]:
+                    if(x["name"] == args[0]):
+                        help_embed = discord.Embed(
+                            title=f"❓ Help - {x['name']}",
+                            description=x["description"]
+                        ).add_field(
+                            name="Usage",
+                            value=f"`{x['usage']}`"
+                        )
+
+                        await ctx.send(embed=help_embed)
+                        return
+
+            help_embed = discord.Embed(
+                title="❓ Help - Niki for Speed v8.306624..",
+                description="**No command found**"
+            )
+            await ctx.send(embed=help_embed)
 
         else:
 
