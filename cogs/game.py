@@ -97,7 +97,7 @@ class GameCog(commands.Cog):
 
         welcome_embed = discord.Embed(
             title=f"Niki for Speed: Text Edition v8.306624...",
-            description="🏎️**Singleplayer Race**\nThe race will start in 5 seconds..."
+            description="**Singleplayer Race** 🏎️\nThe race will start in 5 seconds..."
         ).add_field(
             name="Instructions",
             value=":white_small_square: Enter the correct order of steps to go to the finish line.\n:white_small_square: The steps are w - forward, a - left, s - down, d - right.\n:white_small_square: An example path might look like this :- wwasdwdasasssdw\n:white_small_square: You only have 3 tries to complete the race.\n:white_small_square: You only have 90 seconds between each try."
@@ -121,12 +121,12 @@ class GameCog(commands.Cog):
         await asyncio.sleep(5)
 
         map_embed = discord.Embed(
-            title=f"Racetrack",
+            title=f"Racetrack - {current_map['name']}",
             description=self.format_map(current_map["map"])
         )
         await ctx.send(embed=map_embed)
 
-        start_time_milis = round(time.time() * 1000)
+        start_time_milis = round(time.time() * 1000  - self.bot.latency * 100)
 
         guess_count = 0
         guess_limit = 3
@@ -155,20 +155,29 @@ class GameCog(commands.Cog):
                         await ctx.send(embed=discord.Embed(title="You took too long to finish the race. You lost slowpoke!"))
                         return
                     # Record finishing time
-                    finish_time_milis = round(time.time() * 1000)
+                    finish_time_milis = round(time.time() * 1000  - self.bot.latency * 100)
                     guess = msg.content.lower().strip()
                 guess_count += 1
             else:
                 limit_reached = True
         if limit_reached:
             final_embed = discord.Embed(title="You ran out of tries. You lost!")
-        else:            
-            # Output time taken
-            time_taken = self.format_time(finish_time_milis - start_time_milis)
-            final_embed = discord.Embed(
-                title="You won!",
-                description="Time taken: {}".format(time_taken)
-                )
+        else:
+
+            # Check for faster lap
+
+            fastest_laps = current_profile["fastest_laps"]
+            fastest_lap_achieved = False
+
+            if str(current_map["_id"]) in fastest_laps:
+                if finish_time_milis - start_time_milis < fastest_laps[str(current_map["_id"])]:
+                    fastest_laps[str(current_map["_id"])] = finish_time_milis - start_time_milis
+                    utils.set_high_score(current_profile["_id"], fastest_laps)
+                    fastest_lap_achieved = True
+            else:
+                fastest_laps[str(current_map["_id"])] = finish_time_milis - start_time_milis
+                utils.set_high_score(current_profile["_id"], fastest_laps)
+                fastest_lap_achieved = True
             
             # Update XP and race count
             if "difficulty" in current_map:
@@ -178,6 +187,16 @@ class GameCog(commands.Cog):
                 xp_earned = XP_VALUES["easy"]
             
             utils.sp_won(current_profile["_id"], xp_earned)
+
+            # Output time taken
+            time_taken = self.format_time(finish_time_milis - start_time_milis)
+            final_embed = discord.Embed(
+                title="You won!",
+                description="Time taken: {}\n\n{}".format(
+                    time_taken, 
+                    "**New fastest lap achieved!** 🎉" if fastest_lap_achieved else ""
+                    )
+            )
 
         self.currently_running_channels.pop(self.currently_running_channels.index(ctx.channel.id))
         await ctx.send(embed=final_embed)

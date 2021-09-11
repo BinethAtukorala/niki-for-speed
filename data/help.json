@@ -13,8 +13,12 @@
         "profile": {
 
         },
-        "settings": {
-
-        }
+        "settings": [
+            {
+                "name": "ping",
+                "description": "Check the bot's latency from the server",
+                "usage": "nfs ping"
+            }
+        ]
     }
 }

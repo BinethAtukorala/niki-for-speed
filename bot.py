@@ -11,7 +11,7 @@ class NFSBot(commands.Bot):
     COGS = [
         'cogs.game',
         'cogs.main',
-        'cogs.exp'
+        'cogs.profile'
     ]
 
     def __init__(self, token, prefix):
