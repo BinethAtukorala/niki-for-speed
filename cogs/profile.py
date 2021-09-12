@@ -4,7 +4,7 @@ from pymongo import MongoClient
 
 import utils
 
-class ProfileCog(commands.Cog):
+class Profile(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -36,8 +36,8 @@ class ProfileCog(commands.Cog):
         current_profile = utils.get_profile_by_discord_id(ctx.author.id)
         
         profile_embed = discord.Embed(
-            title="{}'s Profile".format(ctx.author.display_name),
-            description="Races Completed: {}".format(current_profile["race_count"])
+            title="{}'s Profile".format(ctx.author.id["display_name"]),
+            description="Races Completed: {}\n Current Level: Level{}\n XP Earned: {}XP".format(current_profile["race_count"], self.calculate_level(current_profile["xp"]), current_profile["xp"])
         )
 
         await ctx.send(embed=profile_embed)
@@ -63,5 +63,4 @@ class ProfileCog(commands.Cog):
     #         await ctx.channel.send(embed=embed)
 
 def setup(bot):
-    bot.add_cog(ProfileCog(bot))
-    
+    bot.add_cog(Profile(bot))
