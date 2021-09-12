@@ -36,8 +36,8 @@ class Profile(commands.Cog):
         current_profile = utils.get_profile_by_discord_id(ctx.author.id)
         
         profile_embed = discord.Embed(
-            title="{}'s Profile".format(ctx.author.id["display_name"]),
-            description="Races Completed: {}\n Current Level: Level{}\n XP Earned: {}XP".format(current_profile["race_count"], self.calculate_level(current_profile["xp"]), current_profile["xp"])
+            title="{}'s Profile".format(ctx.author.display_name),
+            description="Races Completed: {}\n Current Level: {}\n XP Earned: {}xp".format(current_profile["race_count"], self.calculate_level(current_profile["xp"]), current_profile["xp"])
         )
 
         await ctx.send(embed=profile_embed)
