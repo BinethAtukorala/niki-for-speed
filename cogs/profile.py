@@ -4,7 +4,7 @@ from pymongo import MongoClient
 
 import utils
 
-class Profile(commands.Cog):
+class ProfileCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -36,7 +36,7 @@ class Profile(commands.Cog):
         current_profile = utils.get_profile_by_discord_id(ctx.author.id)
         
         profile_embed = discord.Embed(
-            title="{}'s Profile".format(ctx.author.id["display_name"]),
+            title="{}'s Profile".format(ctx.author.display_name),
             description="Races Completed: {}".format(current_profile["race_count"])
         )
 
@@ -63,5 +63,5 @@ class Profile(commands.Cog):
     #         await ctx.channel.send(embed=embed)
 
 def setup(bot):
-    bot.add_cog(bot(bot))
+    bot.add_cog(ProfileCog(bot))
     
