@@ -31,6 +31,19 @@ class Profile(commands.Cog):
 
         await ctx.send(embed=level_embed)
 
+    @commands.command(name="profile")
+    async def profile(self, ctx):
+        current_profile = utils.get_profile_by_discord_id(ctx.author.id)
+        
+        profile_embed = discord.Embed(
+            title="{}'s Profile".format(ctx.author.id["display_name"]),
+            description="Races Completed: {}".format(current_profile["race_count"])
+        )
+
+        await ctx.send(embed=profile_embed)
+
+
+
     # @commands.command(name="leaderboard")
     # async def leaderboard(self, ctx):
     #     if ctx.channel.id == talk_channels:
@@ -50,5 +63,5 @@ class Profile(commands.Cog):
     #         await ctx.channel.send(embed=embed)
 
 def setup(bot):
-    bot.add_cog(Profile(bot))
+    bot.add_cog(bot(bot))
     
