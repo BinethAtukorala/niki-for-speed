@@ -42,25 +42,5 @@ class Profile(commands.Cog):
 
         await ctx.send(embed=profile_embed)
 
-
-
-    # @commands.command(name="leaderboard")
-    # async def leaderboard(self, ctx):
-    #     if ctx.channel.id == talk_channels:
-    #         rankings = leveling.find().sort("xp", -1)
-    #         i = 1
-    #         embed = discord.Embed(title="rankings")
-    #         for x in rankings:
-    #             try:
-    #                 temp = ctx.guild.get_member(x["id"])
-    #                 tempxp = x["xp"]
-    #                 embed.add_field(name=f"{i}: {temp.name}", value=f"Total XP: {tempxp}", inline=False)
-    #                 i += 1
-    #             except:
-    #                 pass
-    #             if i == 11:
-    #                 break
-    #         await ctx.channel.send(embed=embed)
-
 def setup(bot):
     bot.add_cog(Profile(bot))

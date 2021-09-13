@@ -99,3 +99,18 @@ def sp_won(id, xp_earned):
 def set_high_score(id, fastest_laps):
 
     result = profiles_col.update_one({"_id": id}, {"$set": {"fastest_laps": fastest_laps}})
+
+def get_top_five_race_count():
+
+    aggregate_pipeline = [
+        {
+            "$sort": {"race_count": -1}
+        },
+        {
+            "$limit": 5
+        }
+    ]
+
+    result = profiles_col.aggregate(aggregate_pipeline)
+
+    return list(result)
