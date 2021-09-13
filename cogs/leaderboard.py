@@ -15,10 +15,8 @@ class LeaderboardCog(commands.Cog):
 
         if(len(args) > 0):
             if(args[0] == "races"):
-                top_five = utils.get_top_five_race_count()
-            if(args[0] == "levels"):
-                top_five = utils.get_top_five_calculate_level()
-                
+                top_five = utils.get_top_five("race_count")
+                                
                 print(top_five)
 
                 leaderbooard_title = "Race Count"
@@ -29,10 +27,40 @@ class LeaderboardCog(commands.Cog):
                     profile_string += "#" + str(x) + " | "
                     profile_string += "<@" + str(profile["discord_id"]) + "> - "
                     profile_string += str(profile["race_count"])
-                    profile_string += str(utils.calculate_level(profile["xp"]))
                     profile_string += "**" if profile["discord_id"] == ctx.author.id else ""
                     leaderboard_string += profile_string if leaderboard_string == "" else "\n" + profile_string
 
+            elif(args[0] == "levels"):
+                top_five = utils.get_top_five("xp")
+                                
+                print(top_five)
+
+                leaderbooard_title = "Levels & XP"
+
+                for x in range(1, len(top_five) + 1):
+                    profile = top_five[x-1]
+                    profile_string = "**" if profile["discord_id"] == ctx.author.id else ""
+                    profile_string += "#" + str(x) + " | "
+                    profile_string += "<@" + str(profile["discord_id"]) + "> - "
+                    profile_string += "Level {}  `".format(utils.calculate_level(profile['xp'])) + str(profile["xp"]) + "xp`"
+                    profile_string += "**" if profile["discord_id"] == ctx.author.id else ""
+                    leaderboard_string += profile_string if leaderboard_string == "" else "\n" + profile_string
+
+            elif(args[0] == "mp"):
+                top_five = utils.get_top_five("multiplayer_wins")
+                                
+                print(top_five)
+
+                leaderbooard_title = "Multiplayer Wins"
+
+                for x in range(1, len(top_five) + 1):
+                    profile = top_five[x-1]
+                    profile_string = "**" if profile["discord_id"] == ctx.author.id else ""
+                    profile_string += "#" + str(x) + " | "
+                    profile_string += "<@" + str(profile["discord_id"]) + "> - "
+                    profile_string += str(profile["multiplayer_wins"])
+                    profile_string += "**" if profile["discord_id"] == ctx.author.id else ""
+                    leaderboard_string += profile_string if leaderboard_string == "" else "\n" + profile_string
 
         leaderboard_embed = discord.Embed(
             title=f"Leaderboard - {leaderbooard_title}",

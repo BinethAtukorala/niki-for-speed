@@ -100,11 +100,11 @@ def set_high_score(id, fastest_laps):
 
     result = profiles_col.update_one({"_id": id}, {"$set": {"fastest_laps": fastest_laps}})
 
-def get_top_five_race_count():
+def get_top_five(field:str):
 
     aggregate_pipeline = [
         {
-            "$sort": {"race_count": -1}
+            "$sort": {field: -1}
         },
         {
             "$limit": 5
@@ -115,7 +115,7 @@ def get_top_five_race_count():
 
     return list(result)
 
-def calculate_level(self, xp):
+def calculate_level(xp):
         inc = 0
         level = 0
         level_xp = 0
