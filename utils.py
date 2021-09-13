@@ -114,3 +114,14 @@ def get_top_five_race_count():
     result = profiles_col.aggregate(aggregate_pipeline)
 
     return list(result)
+
+def calculate_level(self, xp):
+        inc = 0
+        level = 0
+        level_xp = 0
+        while(level_xp <= xp):
+            if(level%5 == 0):
+                inc += 2500
+            level_xp += inc
+            level += 1
+        return level
