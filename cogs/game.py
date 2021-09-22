@@ -218,6 +218,22 @@ class GameCog(commands.Cog):
             )
             await ctx.send(embed=already_running_embed)
             return
+        
+        self.currently_running_races[ctx.channel.id] = {
+                'message_id': None,
+                'map_message_id': None,
+                'mode': 'mp',
+                'map': None,
+                'ongoing': True,
+                'guess_limit': 3,
+                'winner': None,
+                'players': {
+                    ctx.author.id: {
+                        'finish_time_milis': 0,
+                        'guess_count': 0
+                    }
+                }
+            }
 
         welcome_embed = discord.Embed(
             title=f"Niki for Speed: Text Edition v8.306624...",
@@ -269,7 +285,7 @@ class GameCog(commands.Cog):
 
             racers_status_str = ""
 
-            for player in self.currently_running_racers[ctx.channel.id]['players']:
+            for player in self.currently_running_races[ctx.channel.id]['players']:
                 racers_status_str += f"<@{player}> - :white_square_button::white_square_button::white_square_button:\n"
 
             map_embed = discord.Embed(
@@ -286,7 +302,7 @@ class GameCog(commands.Cog):
 
             start_time_milis = round(time.time() * 1000  - self.bot.latency * 100)
 
-            countdown = 30
+            countdown = 90
             while(self.currently_running_races[ctx.channel.id]['ongoing']):
                 await asyncio.sleep(1)
                 countdown -= 1
@@ -296,17 +312,24 @@ class GameCog(commands.Cog):
                 else:
                     ongoing = False
                     for player in self.currently_running_races[ctx.channel.id]['players']:
-                        if self.currently_running_races[ctx.channel.id]['players'][player]['finish_time_milis'] == 0:
+                        print(player, self.currently_running_races[ctx.channel.id]['players'][player]['guess_count'])
+                        if self.currently_running_races[ctx.channel.id]['players'][player]['finish_time_milis'] == 0 and self.currently_running_races[ctx.channel.id]['players'][player]['guess_count'] < self.currently_running_races[ctx.channel.id]['guess_limit']:
                             ongoing = True
                     self.currently_running_races[ctx.channel.id]['ongoing'] = ongoing
             
             # Update user profiles
             players = self.currently_running_races[ctx.channel.id]['players']
 
+            sorted_players = sorted(players.items(), key=lambda k_v: k_v[1]['finish_time_milis'])
+            for idd, x in enumerate(sorted_players):
+                if x[1]['finish_time_milis'] == 0:
+                    sorted_players.append(sorted_players.pop(sorted_players.index(x)))
+
             results_string = ""
             
             counter = 1
-            for player_id in players:
+            for player in sorted_players:
+                player_id = player[0]
 
                 # Check if racer finished the race
                 if players[player_id]['finish_time_milis'] != 0:
@@ -341,6 +364,11 @@ class GameCog(commands.Cog):
                     # give the default xp amount if no difficulty is set
                     else:
                         xp_earned = XP_VALUES["easy"]
+                    
+                    # If the player is the winner
+                    if player_id == self.currently_running_races[ctx.channel.id]['winner']:
+                        utils.mp_won(current_profile["_id"])
+                        xp_earned += int(xp_earned/2)
                     
                     utils.sp_won(current_profile["_id"], xp_earned)
 
@@ -417,25 +445,35 @@ class GameCog(commands.Cog):
                                             self.currently_running_races[message.channel.id]['winner'] = message.author.id
 
                                         self.currently_running_races[message.channel.id]['players'][message.author.id]['finish_time_milis'] = finish_time_milis
+                                        asyncio.run_coroutine_threadsafe(message.add_reaction('✅'), asyncio.get_event_loop())
                                     
                                     # Not the correct path -> increase guess counter
                                     else:
                                         self.currently_running_races[message.channel.id]['players'][message.author.id]['guess_count']+=1
-                                    
-                                    racers_status_str = ""
-                                    current_race = self.currently_running_racers[message.channel.id]
-                                    for player in current_race['players']:
-                                        racers_status_str += f"<@{player}> - " + "".join(":x:" for x in current_race['players'][player]['guess_count'])
-                                        racers_status_str += ":white_check_mark:" if (current_race['players'][player]['finish_time_milis'] != 0) else ""
-                                        racers_status_str  += "".join(":x:" for x in range(current_race['guess_limit'] - 1 - len(current_race['players'][player]['guess_count'])))
-                                        racers_status_str += "\n"
-                                    message.embeds[0].clear_fields()
-                                    await message.edit(
-                                        embed=message.embeds[0].add_field(
-                                            name="Status",
-                                            value=racers_status_str
+                                        asyncio.run_coroutine_threadsafe(message.add_reaction('❌'), asyncio.get_event_loop())
+
+                                    async def edit_map_message():
+                                        racers_status_str = ""
+                                        current_race = self.currently_running_races[message.channel.id]
+                                        for player in current_race['players']:
+                                            racers_status_str += f"<@{player}> - " + "".join(":x:" for x in range(current_race['players'][player]['guess_count']))
+                                            if (current_race['players'][player]['finish_time_milis'] != 0):
+                                                racers_status_str += ":white_check_mark:"
+                                                racers_status_str  += "".join(":white_square_button:" for x in range(current_race['guess_limit'] - 1 - current_race['players'][player]['guess_count']))
+                                            else:
+                                                racers_status_str  += "".join(":white_square_button:" for x in range(current_race['guess_limit'] - current_race['players'][player]['guess_count']))
+                                            racers_status_str += "\n"
+
+                                        map_message = await message.channel.fetch_message(current_race['map_message_id'])
+                                        map_message.embeds[0].clear_fields()
+                                        await map_message.edit(
+                                            embed=map_message.embeds[0].add_field(
+                                                name="Status",
+                                                value=racers_status_str
+                                            )
                                         )
-                                    )
+                                    
+                                    asyncio.run_coroutine_threadsafe(edit_map_message(), asyncio.get_event_loop())
                                 
                                 # If racer has finished the race -> ignore
 
@@ -451,20 +489,21 @@ class GameCog(commands.Cog):
     async def on_raw_reaction_add(self, payload):
         if payload.user_id != self.bot.user.id:
             if payload.channel_id in self.currently_running_races:
-                if payload.user_id not in self.currently_running_races[payload.channel_id]['players']:
-                    self.currently_running_races[payload.channel_id]['players'][payload.user_id] = {
-                                                                                                    'finish_time_milis': 0,
-                                                                                                    'guess_count': 0
-                                                                                                }
-                    channel = await self.bot.fetch_channel(payload.channel_id)
-                    message = await channel.fetch_message(self.currently_running_races[payload.channel_id]['message_id'])
-                    message.embeds[0].clear_fields()
-                    await message.edit(
-                        embed=message.embeds[0].add_field(
-                            name="Racers joined",
-                            value=":white_small_square: " + "\n:white_small_square: ".join([f"<@{player}>" for player in self.currently_running_races[payload.channel_id]['players']])
+                if self.currently_running_races[payload.channel_id]['map'] == None:
+                    if payload.user_id not in self.currently_running_races[payload.channel_id]['players']:
+                        self.currently_running_races[payload.channel_id]['players'][payload.user_id] = {
+                                                                                                        'finish_time_milis': 0,
+                                                                                                        'guess_count': 0
+                                                                                                    }
+                        channel = await self.bot.fetch_channel(payload.channel_id)
+                        message = await channel.fetch_message(self.currently_running_races[payload.channel_id]['message_id'])
+                        message.embeds[0].clear_fields()
+                        await message.edit(
+                            embed=message.embeds[0].add_field(
+                                name="Racers joined",
+                                value=":white_small_square: " + "\n:white_small_square: ".join([f"<@{player}>" for player in self.currently_running_races[payload.channel_id]['players']])
+                            )
                         )
-                    )
 
 def setup(bot):
     bot.add_cog(GameCog(bot))
