@@ -26,7 +26,7 @@ class GameCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.currently_running_channels = []
+        self.currently_running_races = {}
     
     def format_time(self, time_taken_milis):
         mins = math.floor(time_taken_milis / 60 / 1000)
@@ -86,9 +86,9 @@ class GameCog(commands.Cog):
 
     @commands.command(name="sp")
     async def sp(self, ctx):
-        """Start a new race"""
+        """Start a new singleplayer race"""
 
-        if ctx.channel.id in self.currently_running_channels:
+        if ctx.channel.id in self.currently_running_races:
             already_running_embed = discord.Embed(
                 title=f"There is already a race active on this channel."
             )
@@ -103,16 +103,12 @@ class GameCog(commands.Cog):
             value=":white_small_square: Enter the correct order of steps to go to the finish line.\n:white_small_square: The steps are w - forward, a - left, s - down, d - right.\n:white_small_square: An example path might look like this :- wwasdwdasasssdw\n:white_small_square: You only have 3 tries to complete the race.\n:white_small_square: You only have 90 seconds between each try."
         )
 
-        self.currently_running_channels.append(ctx.channel.id)
+        self.currently_running_races[ctx.channel.id] = {
+            'mode': 'sp',
+            'user_id': ctx.author.id
+        }
 
         await ctx.send(embed=welcome_embed)
-
-        # Get user's profile or create a new profile if they dont have one
-        current_profile = utils.get_profile_by_discord_id(ctx.author.id)
-        # If no profile exists
-        if current_profile == None:
-            current_profile = utils.new_profile(ctx.author.id)
-        print(current_profile)
         
         # Pick a random map and record start time
         current_map = next(utils.get_random_map())
@@ -151,7 +147,7 @@ class GameCog(commands.Cog):
                     # Timeout if they take too much time to reply
                     except asyncio.TimeoutError:
                         print("Time out")
-                        self.currently_running_channels.pop(self.currently_running_channels.index(ctx.channel.id))
+                        self.currently_running_races.pop(ctx.channel.id)
                         await ctx.send(embed=discord.Embed(title="You took too long to finish the race. You lost slowpoke!"))
                         return
                     # Record finishing time
@@ -163,6 +159,12 @@ class GameCog(commands.Cog):
         if limit_reached:
             final_embed = discord.Embed(title="You ran out of tries. You lost!")
         else:
+
+            # Get user's profile or create a new profile if they dont have one
+            current_profile = utils.get_profile_by_discord_id(ctx.author.id)
+            # If no profile exists
+            if current_profile == None:
+                current_profile = utils.new_profile(ctx.author.id)
 
             # Check for faster lap
 
@@ -198,12 +200,271 @@ class GameCog(commands.Cog):
                     )
             )
 
-        self.currently_running_channels.pop(self.currently_running_channels.index(ctx.channel.id))
+        self.currently_running_races.pop(ctx.channel.id)
         await ctx.send(embed=final_embed)
 # are you ruining my code that i worked SO hard on
 # lmfao yeah, get rekt
 # stupid bitch <--- no you niki yes imdelete ng lmfaooooo  -.- that looks weird. already took a ss :D mf okay okay add the instructions now you cant run more than one race in one channel
 # :D
 # :'(
+
+    @commands.command(name="mp")
+    async def mp(self, ctx):
+        """Start a new multiplayer race"""
+
+        if ctx.channel.id in self.currently_running_races:
+            already_running_embed = discord.Embed(
+                title=f"There is already a race active on this channel."
+            )
+            await ctx.send(embed=already_running_embed)
+            return
+
+        welcome_embed = discord.Embed(
+            title=f"Niki for Speed: Text Edition v8.306624...",
+            description="**Multiplayer Race** 🏎️\nThe race will start after players have signed up..."
+        ).add_field(
+            name="Instructions",
+            value=":white_small_square: React to the message below to join the race.\n:white_small_square: Enter the correct order of steps to go to the finish line.\n:white_small_square: The steps are w - forward, a - left, s - down, d - right.\n:white_small_square: An example path might look like this :- wwasdwdasasssdw\n:white_small_square: You only have 3 tries to complete the race.\n:white_small_square: You only have 90 seconds between each try."
+        )
+
+        await ctx.send(embed=welcome_embed)
+
+        race_join_embed = discord.Embed(
+            title="React to this message to join.",
+            description=f"Click on the reaction below to join the multiplayer race started by {ctx.author.mention}\n(10 seconds left)"
+        ).add_field(
+            name="Racers joined",
+            value=f":white_small_square: <@{ctx.author.id}>"
+        )
+
+        race_join_message = await ctx.send(embed=race_join_embed)
+        await race_join_message.add_reaction('✅')
+
+        self.currently_running_races[ctx.channel.id] = {
+                'message_id': race_join_message.id,
+                'map_message_id': None,
+                'mode': 'mp',
+                'map': None,
+                'ongoing': True,
+                'guess_limit': 3,
+                'winner': None,
+                'players': {
+                    ctx.author.id: {
+                        'finish_time_milis': 0,
+                        'guess_count': 0
+                    }
+                }
+            }
+
+        await asyncio.sleep(10)
+
+        # Check if there are 2 or more races
+        if(len(self.currently_running_races[ctx.channel.id]['players']) > 1):
+
+            # Pick a random map and record start time
+            current_map = next(utils.get_random_map())
+
+            # Wait for 5 seconds for the race to start
+            await asyncio.sleep(5)
+
+            racers_status_str = ""
+
+            for player in self.currently_running_racers[ctx.channel.id]['players']:
+                racers_status_str += f"<@{player}> - :white_square_button::white_square_button::white_square_button:\n"
+
+            map_embed = discord.Embed(
+                title=f"Racetrack - {current_map['name']}",
+                description=self.format_map(current_map["map"])
+            ).add_field(
+                name="Status",
+                value=racers_status_str
+            )
+            map_message = await ctx.send(embed=map_embed)
+
+            self.currently_running_races[ctx.channel.id]['map'] = current_map['map']
+            self.currently_running_races[ctx.channel.id]['map_message_id'] = map_message.id
+
+            start_time_milis = round(time.time() * 1000  - self.bot.latency * 100)
+
+            countdown = 30
+            while(self.currently_running_races[ctx.channel.id]['ongoing']):
+                await asyncio.sleep(1)
+                countdown -= 1
+
+                if(countdown == 0):
+                    self.currently_running_races[ctx.channel.id]['ongoing'] = False
+                else:
+                    ongoing = False
+                    for player in self.currently_running_races[ctx.channel.id]['players']:
+                        if self.currently_running_races[ctx.channel.id]['players'][player]['finish_time_milis'] == 0:
+                            ongoing = True
+                    self.currently_running_races[ctx.channel.id]['ongoing'] = ongoing
+            
+            # Update user profiles
+            players = self.currently_running_races[ctx.channel.id]['players']
+
+            results_string = ""
+            
+            counter = 1
+            for player_id in players:
+
+                # Check if racer finished the race
+                if players[player_id]['finish_time_milis'] != 0:
+                    
+                    finish_time_milis = players[player_id]['finish_time_milis']
+
+                    # Get user's profile or create a new profile if they dont have one
+                    current_profile = utils.get_profile_by_discord_id(player_id)
+                    # If no profile exists
+                    if current_profile == None:
+                        current_profile = utils.new_profile(player_id)
+                    
+                    # Check for faster lap
+
+                    fastest_laps = current_profile["fastest_laps"]
+                    fastest_lap_achieved = False
+
+                    if str(current_map["_id"]) in fastest_laps:
+                        if finish_time_milis - start_time_milis < fastest_laps[str(current_map["_id"])]:
+                            fastest_laps[str(current_map["_id"])] = finish_time_milis - start_time_milis
+                            utils.set_high_score(current_profile["_id"], fastest_laps)
+                            fastest_lap_achieved = True
+                    
+                    else:
+                        fastest_laps[str(current_map["_id"])] = finish_time_milis - start_time_milis
+                        utils.set_high_score(current_profile["_id"], fastest_laps)
+                        fastest_lap_achieved = True
+
+                    # Update XP and race count
+                    if "difficulty" in current_map:
+                        xp_earned = XP_VALUES[current_map["difficulty"]]
+                    # give the default xp amount if no difficulty is set
+                    else:
+                        xp_earned = XP_VALUES["easy"]
+                    
+                    utils.sp_won(current_profile["_id"], xp_earned)
+
+                    # Output time taken
+                    time_taken = self.format_time(finish_time_milis - start_time_milis)
+
+                    results_string += f":white_small_square: #{counter} <@{player_id}> - {time_taken}\n"
+                
+                # Racer hasn't finished the race
+                else:
+                    results_string += f":white_small_square: #{counter} <@{player_id}> - DNF\n"
+                
+                counter += 1
+            
+            final_embed = discord.Embed(
+                title="Race results!",
+                description=f"**Winner** - <@{self.currently_running_races[ctx.channel.id]['winner']}>"
+            ).add_field(
+                name="Leaderboard",
+                value=results_string
+            )
+
+            await ctx.send(embed=final_embed)
+
+        else:
+
+            not_enough_racers_embed = discord.Embed(
+                title="Not enough racers...",
+                description="Need 2 or more racers to start."
+            )
+
+            await ctx.send(embed=not_enough_racers_embed)
+        self.currently_running_races.pop(ctx.channel.id)
+
+    
+    @commands.Cog.listener()
+    async def on_message(self, message):
+
+        finish_time_milis = round(time.time() * 1000  - self.bot.latency * 100)
+
+        # Check that the message is not from the bot
+        if message.author.id != self.bot.user.id:
+
+            # Check whether a race exists in the channel
+            if message.channel.id in self.currently_running_races:
+
+                # Get current race details to a variable
+                current_race = self.currently_running_races[message.channel.id]
+
+                # Check if it's a multiplayer
+                if current_race['mode'] == 'mp': 
+
+                    # Check if the user has signed up for the race && that the sign-up phase is over (whether a map is set or not) && whether the race has stopped looking for guesses (ongoing)
+                    if message.author.id in current_race['players'] and current_race['map'] != None and current_race['ongoing']:
+                        # Get the guess
+                        guess = message.content.lower().strip()
+                        # Get the current racer details from current_race
+                        current_racer = current_race['players'][message.author.id]
+
+                        # Check whether the guess is a valid path
+                        if re.search(r'^[wasd]+$', guess):
+
+                            # Check whether this racer has passed the guess limit
+                            if current_racer['guess_count'] < current_race['guess_limit']:
+
+                                # Check whether the racer hasn't finished the race
+                                if current_racer['finish_time_milis'] == 0:
+                                
+                                    # Check whether it's the correct path
+                                    if self.correct_path(current_race['map'], guess):
+
+                                        # Check whether a winner doesn't exist
+                                        if(current_race['winner'] == None):
+                                            self.currently_running_races[message.channel.id]['winner'] = message.author.id
+
+                                        self.currently_running_races[message.channel.id]['players'][message.author.id]['finish_time_milis'] = finish_time_milis
+                                    
+                                    # Not the correct path -> increase guess counter
+                                    else:
+                                        self.currently_running_races[message.channel.id]['players'][message.author.id]['guess_count']+=1
+                                    
+                                    racers_status_str = ""
+                                    current_race = self.currently_running_racers[message.channel.id]
+                                    for player in current_race['players']:
+                                        racers_status_str += f"<@{player}> - " + "".join(":x:" for x in current_race['players'][player]['guess_count'])
+                                        racers_status_str += ":white_check_mark:" if (current_race['players'][player]['finish_time_milis'] != 0) else ""
+                                        racers_status_str  += "".join(":x:" for x in range(current_race['guess_limit'] - 1 - len(current_race['players'][player]['guess_count'])))
+                                        racers_status_str += "\n"
+                                    message.embeds[0].clear_fields()
+                                    await message.edit(
+                                        embed=message.embeds[0].add_field(
+                                            name="Status",
+                                            value=racers_status_str
+                                        )
+                                    )
+                                
+                                # If racer has finished the race -> ignore
+
+                            # Passed the guess limit -> ignore
+                        
+                        # Not a valid path -> ignore
+                    
+                    # Hasn't signed up -> ignore
+
+
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        if payload.user_id != self.bot.user.id:
+            if payload.channel_id in self.currently_running_races:
+                if payload.user_id not in self.currently_running_races[payload.channel_id]['players']:
+                    self.currently_running_races[payload.channel_id]['players'][payload.user_id] = {
+                                                                                                    'finish_time_milis': 0,
+                                                                                                    'guess_count': 0
+                                                                                                }
+                    channel = await self.bot.fetch_channel(payload.channel_id)
+                    message = await channel.fetch_message(self.currently_running_races[payload.channel_id]['message_id'])
+                    message.embeds[0].clear_fields()
+                    await message.edit(
+                        embed=message.embeds[0].add_field(
+                            name="Racers joined",
+                            value=":white_small_square: " + "\n:white_small_square: ".join([f"<@{player}>" for player in self.currently_running_races[payload.channel_id]['players']])
+                        )
+                    )
+
 def setup(bot):
     bot.add_cog(GameCog(bot))
