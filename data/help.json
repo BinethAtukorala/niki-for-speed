@@ -5,6 +5,11 @@
                 "name": "sp",
                 "description": "Start a singleplayer race.",
                 "usage": "nfs sp"
+            },
+            {
+                "name": "mp",
+                "description": "Start a multiplayer race.",
+                "usage": "nfs mp"
             }
         ],
         "statistics": {
@@ -13,6 +18,13 @@
         "profile": {
 
         },
+        "leaderboard": [
+            {
+                "name": "top races",
+                "description": "Shows players in the top 5 race count",
+                "usage": "nfs top races"
+            }
+        ],
         "settings": [
             {
                 "name": "ping",

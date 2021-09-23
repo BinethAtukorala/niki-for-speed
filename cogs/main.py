@@ -67,6 +67,11 @@ class MainCog(commands.Cog):
                 value=game_commands_str[:-2]
             )
             
+            help_embed = help_embed.add_field(
+                name="🏆 Leaderboard commands",
+                value=game_commands_str[:-2]
+            )
+
             await ctx.send(embed=help_embed)
 
 
