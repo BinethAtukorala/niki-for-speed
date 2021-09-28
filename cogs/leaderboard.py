@@ -61,10 +61,28 @@ class LeaderboardCog(commands.Cog):
                     profile_string += str(profile["multiplayer_wins"])
                     profile_string += "**" if profile["discord_id"] == ctx.author.id else ""
                     leaderboard_string += profile_string if leaderboard_string == "" else "\n" + profile_string
+            else:
+                leaderbooard_title = "Not valid"
+                leaderboard_string = "The given leaderboard type is not available.\nView the help command for more information.\n\n`nfs help top`"
+        else:
+            top_five = utils.get_top_five("multiplayer_wins")
+                                
+            print(top_five)
+
+            leaderbooard_title = "Multiplayer Wins"
+
+            for x in range(1, len(top_five) + 1):
+                profile = top_five[x-1]
+                profile_string = "**" if profile["discord_id"] == ctx.author.id else ""
+                profile_string += "#" + str(x) + " | "
+                profile_string += "<@" + str(profile["discord_id"]) + "> - "
+                profile_string += str(profile["multiplayer_wins"])
+                profile_string += "**" if profile["discord_id"] == ctx.author.id else ""
+                leaderboard_string += profile_string if leaderboard_string == "" else "\n" + profile_string
 
         leaderboard_embed = discord.Embed(
             title=f"Leaderboard - {leaderbooard_title}",
-            description=leaderboard_string
+            description="For more leaderboard types, check `nfs help top`\n\n"+ leaderboard_string
         )
 
         await ctx.send(embed=leaderboard_embed)

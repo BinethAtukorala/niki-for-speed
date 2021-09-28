@@ -20,9 +20,9 @@
         },
         "leaderboard": [
             {
-                "name": "top races",
-                "description": "Shows players in the top 5 race count",
-                "usage": "nfs top races"
+                "name": "top",
+                "description": "View the different leaderboards of the bot\n\n**Leaderboards**\n\n:white_small_square: `races` - Most number of races\n:white_small_square: `levels` - Highest levels/xp\n:white_small_square: `mp` - Most wins in multiplayer races",
+                "usage": "nfs top [leaderboard type]"
             }
         ],
         "settings": [

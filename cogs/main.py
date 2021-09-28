@@ -58,9 +58,12 @@ class MainCog(commands.Cog):
             commands_help = utils.get_commands_help()
 
             game_commands_str = ""
+            leaderboard_commands_str = ""
 
             for x in commands_help["game"]:
-                game_commands_str += "`" + x["name"] + "` "
+                game_commands_str += "`" + x["name"] + "`, "
+            for x in commands_help["leaderboard"]:
+                leaderboard_commands_str += "`" + x["name"] + "`, "
 
             help_embed = help_embed.add_field(
                 name="🎮 Game commands",
@@ -69,7 +72,7 @@ class MainCog(commands.Cog):
             
             help_embed = help_embed.add_field(
                 name="🏆 Leaderboard commands",
-                value=game_commands_str[:-2]
+                value=leaderboard_commands_str[:-2]
             )
 
             await ctx.send(embed=help_embed)
